@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from db import get_db
 import crud 
-from schemas import UserCreate, ClassCreate,SubjectCreate,TeacherCreate, StudentCreate, ResultCreate, ResultUpdate
+from schemas import UserCreate, ClassCreate,SubjectCreate,TeacherCreate, StudentCreate, ResultCreate, ResultUpdate, StudentLoginRequest
 from collections import defaultdict
 
 
@@ -29,6 +29,14 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
     allow_headers=["*"],  # Allows all headers
 )
+
+
+
+
+# 🔹 Endpoint for student login
+@app.post("/student-login/")
+def student_login(request: StudentLoginRequest, conn=Depends(get_db)):
+    return crud.student_login(conn, request.studentID, request.dob)
 
 
 # POST endpoint to create a user
@@ -212,14 +220,20 @@ def get_results(conn=Depends(get_db)):
     return results
 
 
-
-# Get a specific result by ID
-@app.get("/results/{result_id}")
-def get_result(result_id: int, conn=Depends(get_db)):
-    result = crud.get_result_by_id(conn, result_id)
-    if not result:
-        return {"message": "Result not found"}
-    return result
+# Get results for a student by studentID (userid)
+@app.get("/results/{student_id}")
+def get_student_results(student_id: str, conn=Depends(get_db)):
+    results = crud.get_results_by_student_id(conn, student_id)
+    if not results:
+        return {"message": "No results found"}
+    
+    total_marks = sum(result["marks"] for result in results)
+    
+    return {
+        "student_id": student_id,
+        "subjects_with_marks": {result["subjectName"]: result["marks"] for result in results},
+        "total_marks": total_marks
+    }
 
 # Update a result
 @app.put("/results/{result_id}")

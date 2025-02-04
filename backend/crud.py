@@ -6,6 +6,29 @@ from fastapi import HTTPException
 
 
 
+
+def student_login(conn, studentID: str, dob: str):
+    cursor = conn.cursor(as_dict=True)
+
+    # 🔹 Check if the student exists and is active
+    cursor.execute("SELECT id, firstName, lastName, studentID FROM students WHERE studentID = %s AND DOB = %s AND record_status = 'Active'", (studentID, dob))
+    student = cursor.fetchone()
+
+    if not student:
+        raise HTTPException(status_code=401, detail="Invalid Student ID or DOB, or account is inactive.")
+
+    return {
+        "message": "Login successful",
+        "student_id": student["studentID"],
+        "student_name": f"{student['firstName']} {student['lastName']}"
+    }
+
+
+####################################################
+#USER CRUD
+####################################################
+
+
 def create_user(conn, user: UserCreate):
     # Hash the password before storing it
     hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -492,8 +515,6 @@ def create_result(conn, result):
 
 
 # Get all active results
-
-
 def get_results(conn):
     query = """
         SELECT 
@@ -531,12 +552,19 @@ def get_results(conn):
 
 
 
-# Get a specific result by ID
-def get_result_by_id(conn, result_id: int):
-    query = "SELECT * FROM results WHERE id = %s AND record_status = 'Active'"
+# Fetch results by studentID (userid)
+def get_results_by_student_id(conn, student_id: str):
+    query = """
+        SELECT r.subjectID, s.subjectName, r.marks
+        FROM results r
+        JOIN subjects s ON r.subjectID = s.id
+        JOIN students st ON r.userid = st.studentID
+        WHERE r.userid = %s AND r.record_status = 'Active'
+    """
     cursor = conn.cursor(as_dict=True)
-    cursor.execute(query, (result_id,))
-    return cursor.fetchone()
+    cursor.execute(query, (student_id,))
+    return cursor.fetchall()
+
 
 # Update a result
 def update_result(conn, result_id: int, result: ResultUpdate):
