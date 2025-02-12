@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from db import get_db
 import crud 
-from schemas import UserCreate, ClassCreate,SubjectCreate,TeacherCreate, StudentCreate, ResultCreate, ResultUpdate
+from schemas import UserCreate, ClassCreate,SubjectCreate,TeacherCreate, StudentCreate, ResultCreate, ResultUpdate, StudentLoginRequest, TeacherAdminLoginRequest
 from collections import defaultdict
 
 
@@ -19,6 +19,7 @@ origins = [
     "http://127.0.0.1:3000",
     "http://localhost",  
     "http://127.0.0.1",
+    "http://localhost:5173"
     # Add other allowed origins if needed...
 ]
 
@@ -29,6 +30,47 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
     allow_headers=["*"],  # Allows all headers
 )
+
+
+
+
+# 🔹 Endpoint for student login
+@app.post("/student-login/")
+def student_login(request: StudentLoginRequest, conn=Depends(get_db)):
+    return crud.student_login(conn, request.studentID, request.dob)
+
+
+# 🔹 Endpoint for teacher/admin login
+@app.post("/teacher-admin-login/")
+def teacher_admin_login(request: TeacherAdminLoginRequest, conn=Depends(get_db)):
+    return crud.teacher_admin_login(conn, request.email, request.password)
+
+@app.get("/dashboard-summary/")
+def dashboard_summary(conn=Depends(get_db)):
+    cursor = conn.cursor(as_dict=True)
+
+    # Get total students
+    cursor.execute("SELECT COUNT(*) AS total_students FROM students WHERE record_status = 'Active'")
+    total_students = cursor.fetchone()["total_students"]
+
+    # Get total teachers
+    cursor.execute("SELECT COUNT(*) AS total_teachers FROM teachers WHERE record_status = 'Active'")
+    total_teachers = cursor.fetchone()["total_teachers"]
+
+    # Get total classes
+    cursor.execute("SELECT COUNT(*) AS total_classes FROM classes WHERE record_status = 'Active'")
+    total_classes = cursor.fetchone()["total_classes"]
+
+    # Get total subjects
+    cursor.execute("SELECT COUNT(*) AS total_subjects FROM subjects WHERE record_status = 'Active'")
+    total_subjects = cursor.fetchone()["total_subjects"]
+
+    return {
+        "total_students": total_students,
+        "total_teachers": total_teachers,
+        "total_classes": total_classes,
+        "total_subjects": total_subjects
+    }
 
 
 # POST endpoint to create a user
@@ -212,14 +254,20 @@ def get_results(conn=Depends(get_db)):
     return results
 
 
-
-# Get a specific result by ID
-@app.get("/results/{result_id}")
-def get_result(result_id: int, conn=Depends(get_db)):
-    result = crud.get_result_by_id(conn, result_id)
-    if not result:
-        return {"message": "Result not found"}
-    return result
+# Get results for a student by studentID (userid)
+@app.get("/results/{student_id}")
+def get_student_results(student_id: str, conn=Depends(get_db)):
+    results = crud.get_results_by_student_id(conn, student_id)
+    if not results:
+        return {"message": "No results found"}
+    
+    total_marks = sum(result["marks"] for result in results)
+    
+    return {
+        "student_id": student_id,
+        "subjects_with_marks": {result["subjectName"]: result["marks"] for result in results},
+        "total_marks": total_marks
+    }
 
 # Update a result
 @app.put("/results/{result_id}")

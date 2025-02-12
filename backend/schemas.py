@@ -58,11 +58,22 @@ class ResultUpdate(BaseModel):
     marks: float
     result_date: date
 
-class ResultResponse(ResultCreate):
-    id: int
-    record_status: str
-    created_at: date
-    updated_at: Optional[date]
+
+class ResultResponse(BaseModel):
+    student_id: str
+    subjects_with_marks: dict
+    total_marks: float
 
     class Config:
         from_attributes = True
+
+
+class StudentLoginRequest(BaseModel):
+    studentID: str
+    dob: date  # Expecting a string in YYYY-MM-DD format
+
+
+class TeacherAdminLoginRequest(BaseModel):
+    email: str
+    password: str  
+

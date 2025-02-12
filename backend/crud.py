@@ -1,9 +1,61 @@
 import pymssql
 from pymssql import Connection
-from schemas import UserCreate, ClassCreate, SubjectCreate,TeacherCreate,StudentCreate, ResultCreate, ResultUpdate
+from schemas import UserCreate, ClassCreate, SubjectCreate,TeacherCreate,StudentCreate, ResultCreate, ResultUpdate, TeacherAdminLoginRequest
 import bcrypt
 from fastapi import HTTPException
 
+
+
+
+def student_login(conn, studentID: str, dob: str):
+    cursor = conn.cursor(as_dict=True)
+
+    # 🔹 Check if the student exists and is active
+    cursor.execute("SELECT id, firstName, lastName, studentID FROM students WHERE studentID = %s AND DOB = %s AND record_status = 'Active'", (studentID, dob))
+    student = cursor.fetchone()
+
+    if not student:
+        raise HTTPException(status_code=401, detail="Invalid Student ID or DOB, or account is inactive.")
+
+    return {
+        "message": "Login successful",
+        "student_id": student["studentID"],
+        "student_name": f"{student['firstName']} {student['lastName']}"
+    }
+
+
+
+
+def teacher_admin_login(conn, email: str, password: str):
+    cursor = conn.cursor(as_dict=True)
+
+    # 🔹 Fetch the user
+    cursor.execute(
+        "SELECT id, firstName, lastName, password FROM teachers WHERE email = %s AND record_status = 'Active'",
+        (email,)
+    )
+    user = cursor.fetchone()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or account is inactive.")
+
+    #print(f"Stored hashed password: {user['password']}")  # Debugging
+
+    # 🔹 Verify the hashed password
+    if not bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
+        raise HTTPException(status_code=401, detail="Invalid password.")
+
+    return {
+        "message": "Login successful",
+        "user_id": user["id"],
+        "user_name": f"{user['firstName']} {user['lastName']}",
+       
+    }
+
+
+####################################################
+#USER CRUD
+####################################################
 
 
 def create_user(conn, user: UserCreate):
@@ -492,8 +544,6 @@ def create_result(conn, result):
 
 
 # Get all active results
-
-
 def get_results(conn):
     query = """
         SELECT 
@@ -531,12 +581,19 @@ def get_results(conn):
 
 
 
-# Get a specific result by ID
-def get_result_by_id(conn, result_id: int):
-    query = "SELECT * FROM results WHERE id = %s AND record_status = 'Active'"
+# Fetch results by studentID (userid)
+def get_results_by_student_id(conn, student_id: str):
+    query = """
+        SELECT r.subjectID, s.subjectName, r.marks
+        FROM results r
+        JOIN subjects s ON r.subjectID = s.id
+        JOIN students st ON r.userid = st.studentID
+        WHERE r.userid = %s AND r.record_status = 'Active'
+    """
     cursor = conn.cursor(as_dict=True)
-    cursor.execute(query, (result_id,))
-    return cursor.fetchone()
+    cursor.execute(query, (student_id,))
+    return cursor.fetchall()
+
 
 # Update a result
 def update_result(conn, result_id: int, result: ResultUpdate):
