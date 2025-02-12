@@ -1,6 +1,6 @@
 import pymssql
 from pymssql import Connection
-from schemas import UserCreate, ClassCreate, SubjectCreate,TeacherCreate,StudentCreate, ResultCreate, ResultUpdate
+from schemas import UserCreate, ClassCreate, SubjectCreate,TeacherCreate,StudentCreate, ResultCreate, ResultUpdate, TeacherAdminLoginRequest
 import bcrypt
 from fastapi import HTTPException
 
@@ -21,6 +21,35 @@ def student_login(conn, studentID: str, dob: str):
         "message": "Login successful",
         "student_id": student["studentID"],
         "student_name": f"{student['firstName']} {student['lastName']}"
+    }
+
+
+
+
+def teacher_admin_login(conn, email: str, password: str):
+    cursor = conn.cursor(as_dict=True)
+
+    # 🔹 Fetch the user
+    cursor.execute(
+        "SELECT id, firstName, lastName, password FROM teachers WHERE email = %s AND record_status = 'Active'",
+        (email,)
+    )
+    user = cursor.fetchone()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or account is inactive.")
+
+    print(f"Stored hashed password: {user['password']}")  # Debugging
+
+    # 🔹 Verify the hashed password
+    if not bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
+        raise HTTPException(status_code=401, detail="Invalid password.")
+
+    return {
+        "message": "Login successful",
+        "user_id": user["id"],
+        "user_name": f"{user['firstName']} {user['lastName']}",
+       
     }
 
 

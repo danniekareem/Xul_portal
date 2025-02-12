@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from db import get_db
 import crud 
-from schemas import UserCreate, ClassCreate,SubjectCreate,TeacherCreate, StudentCreate, ResultCreate, ResultUpdate, StudentLoginRequest
+from schemas import UserCreate, ClassCreate,SubjectCreate,TeacherCreate, StudentCreate, ResultCreate, ResultUpdate, StudentLoginRequest, TeacherAdminLoginRequest
 from collections import defaultdict
 
 
@@ -19,6 +19,7 @@ origins = [
     "http://127.0.0.1:3000",
     "http://localhost",  
     "http://127.0.0.1",
+    "http://localhost:5173"
     # Add other allowed origins if needed...
 ]
 
@@ -37,6 +38,12 @@ app.add_middleware(
 @app.post("/student-login/")
 def student_login(request: StudentLoginRequest, conn=Depends(get_db)):
     return crud.student_login(conn, request.studentID, request.dob)
+
+
+# 🔹 Endpoint for teacher/admin login
+@app.post("/teacher-admin-login/")
+def teacher_admin_login(request: TeacherAdminLoginRequest, conn=Depends(get_db)):
+    return crud.teacher_admin_login(conn, request.email, request.password)
 
 
 # POST endpoint to create a user

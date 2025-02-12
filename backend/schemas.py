@@ -71,3 +71,9 @@ class ResultResponse(BaseModel):
 class StudentLoginRequest(BaseModel):
     studentID: str
     dob: date  # Expecting a string in YYYY-MM-DD format
+
+
+class TeacherAdminLoginRequest(BaseModel):
+    email: str
+    password: str  
+
