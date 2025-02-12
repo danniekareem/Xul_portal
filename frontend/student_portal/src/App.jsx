@@ -73,12 +73,12 @@ const TeacherAdminLogin = () => {
             body: JSON.stringify({ email, password })
         });
         const data = await response.json();
-
+        
         if (data.message === "Login successful") {
             localStorage.setItem("user_id", data.user_id);
             localStorage.setItem("user_name", data.user_name);
-            
-            navigate("/dashboard");
+
+                navigate("/dashboard");
         } else {
             setError("Invalid credentials");
         }
@@ -112,32 +112,71 @@ const TeacherAdminLogin = () => {
 };
 
 // Protected Dashboard Route
+
 const Dashboard = () => {
     const navigate = useNavigate();
-    const userRole = localStorage.getItem("user_role");
+    const user_id = localStorage.getItem("user_id");
+    const user_name = localStorage.getItem("user_name");
+
+    const [summary, setSummary] = useState({
+        total_students: 0,
+        total_teachers: 0,
+        total_classes: 0,
+        total_subjects: 0,
+    });
 
     useEffect(() => {
-        if (!userRole) {
+        if (!user_id) {
             alert("Unauthorized access. Redirecting to login...");
             navigate("/login_teacher_admin");
+            return;
         }
-    }, [userRole, navigate]);
+
+        // Fetch summary data from the backend
+        fetch(`${apiUrl}/dashboard-summary/`)
+            .then(response => response.json())
+            .then(data => setSummary(data))
+            .catch(error => console.error("Error fetching summary:", error));
+    }, [user_id, navigate]);
 
     return (
         <div className="dashboard-container">
-            <h2>Teacher/Admin Dashboard</h2>
-            <p>Welcome, {localStorage.getItem("user_name")}!</p>
+            {/* Sidebar */}
+            <aside className="sidebar">
+                <h3>Dashboard</h3>
+                <ul>
+                    <li onClick={() => navigate("/manage_classes")}>📚 Manage Classes</li>
+                    <li onClick={() => navigate("/manage_subjects")}>📖 Manage Subjects</li>
+                    <li onClick={() => navigate("/manage_results")}>📝 Manage Results</li>
+                    <li onClick={() => navigate("/manage_students")}>👨‍🎓 Manage Students</li>
+                </ul>
 
-            <div className="dashboard-links">
-                {userRole === "admin" && <button onClick={() => navigate("/manage_teachers")}>Manage Teachers</button>}
-                <button onClick={() => navigate("/manage_classes")}>Manage Classes</button>
-                <button onClick={() => navigate("/manage_subjects")}>Manage Subjects</button>
-                <button onClick={() => navigate("/manage_results")}>Manage Results</button>
-            </div>
+                {/* 🔹 Logout Button Now Moved Up Slightly */}
+                <button className="logout-button" onClick={() => { 
+                    localStorage.clear(); 
+                    navigate("/login_teacher_admin"); 
+                }}>
+                    Logout
+                </button>
+            </aside>
 
-            <button className="logout-button" onClick={() => { localStorage.clear(); navigate("/login_teacher_admin"); }}>
-                Logout
-            </button>
+
+            {/* Main Content */}
+            <main className="dashboard-main">
+                {/* Teacher/Admin Info */}
+                <header className="dashboard-header">
+                    <h2>Teacher/Admin Dashboard</h2>
+                    <p>Welcome, <strong>{user_name}</strong>!</p>
+                </header>
+
+                {/* Summary Section */}
+                <div className="dashboard-summary">
+                    <div className="summary-card">👨‍🎓 Students: {summary.total_students}</div>
+                    <div className="summary-card">👨‍🏫 Teachers: {summary.total_teachers}</div>
+                    <div className="summary-card">🏫 Classes: {summary.total_classes}</div>
+                    <div className="summary-card">📖 Subjects: {summary.total_subjects}</div>
+                </div>
+            </main>
         </div>
     );
 };
@@ -190,6 +229,7 @@ const Results = () => {
                                 <tr key={subject}>
                                     <td>{subject}</td>
                                     <td>{marks}</td>
+                                    <td></td>
                                 </tr>
                             ))}
                         </tbody>

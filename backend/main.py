@@ -45,6 +45,33 @@ def student_login(request: StudentLoginRequest, conn=Depends(get_db)):
 def teacher_admin_login(request: TeacherAdminLoginRequest, conn=Depends(get_db)):
     return crud.teacher_admin_login(conn, request.email, request.password)
 
+@app.get("/dashboard-summary/")
+def dashboard_summary(conn=Depends(get_db)):
+    cursor = conn.cursor(as_dict=True)
+
+    # Get total students
+    cursor.execute("SELECT COUNT(*) AS total_students FROM students WHERE record_status = 'Active'")
+    total_students = cursor.fetchone()["total_students"]
+
+    # Get total teachers
+    cursor.execute("SELECT COUNT(*) AS total_teachers FROM teachers WHERE record_status = 'Active'")
+    total_teachers = cursor.fetchone()["total_teachers"]
+
+    # Get total classes
+    cursor.execute("SELECT COUNT(*) AS total_classes FROM classes WHERE record_status = 'Active'")
+    total_classes = cursor.fetchone()["total_classes"]
+
+    # Get total subjects
+    cursor.execute("SELECT COUNT(*) AS total_subjects FROM subjects WHERE record_status = 'Active'")
+    total_subjects = cursor.fetchone()["total_subjects"]
+
+    return {
+        "total_students": total_students,
+        "total_teachers": total_teachers,
+        "total_classes": total_classes,
+        "total_subjects": total_subjects
+    }
+
 
 # POST endpoint to create a user
 @app.post("/users/")

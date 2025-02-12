@@ -39,7 +39,7 @@ def teacher_admin_login(conn, email: str, password: str):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or account is inactive.")
 
-    print(f"Stored hashed password: {user['password']}")  # Debugging
+    #print(f"Stored hashed password: {user['password']}")  # Debugging
 
     # 🔹 Verify the hashed password
     if not bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
