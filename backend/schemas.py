@@ -16,10 +16,21 @@ class UserCreate(BaseModel):
         from_attributes = True
 
 
+class Class(BaseModel):
+    id: int
+    class_: int
+    record_status: str
+
+    class Config:
+        from_attributes = True
+
 
 class ClassCreate(BaseModel):
     class_: int  # Using class_ since `class` is a reserved keyword in Python
 
+
+class ClassUpdate(BaseModel):
+    class_: int
 
 
 class SubjectCreate(BaseModel):

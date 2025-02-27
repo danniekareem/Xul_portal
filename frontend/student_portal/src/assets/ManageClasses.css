@@ -1,0 +1,150 @@
+/* 🔹 Full-Width Centered Container */
+.manage-classes-container {
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin: 40px auto;
+}
+
+/* 🔹 Title Styling */
+.section-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #007bff;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+/* 🔹 Add Class Form */
+.class-form {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.class-form input {
+    padding: 12px;
+    font-size: 16px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.primary-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.primary-button:hover {
+    background-color: #0056b3;
+}
+
+/* 🔹 Table Styling */
+.class-list {
+    width: 100%;
+    margin: 20px auto;
+    overflow-x: auto;
+}
+
+.class-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.class-list th, .class-list td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+.class-list th {
+    background-color: #007bff;
+    color: white;
+    font-size: 18px;
+}
+
+.class-list tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.class-list tr:hover {
+    background-color: #e9ecef;
+}
+
+/* 🔹 Action Buttons */
+.delete-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    background-color: #dc3545;
+    color: white;
+    transition: 0.3s;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+/* 🔹 No Results Message */
+.no-results {
+    color: red;
+    font-size: 1.1em;
+    margin-top: 20px;
+}
+
+/* 🔹 Back Button */
+.back-button {
+    margin-top: 20px;
+    padding: 12px 16px;
+    font-size: 16px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.back-button:hover {
+    background-color: #5a6268;
+}
+
+/* 🔹 Responsive Design */
+@media (max-width: 768px) {
+    .manage-classes-container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .class-form {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .class-form input {
+        width: 100%;
+    }
+
+    .class-list table {
+        font-size: 14px;
+    }
+
+    .delete-button {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
