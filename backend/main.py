@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from db import get_db
 import crud 
-from schemas import UserCreate, ClassCreate,SubjectCreate,TeacherCreate, StudentCreate, ResultCreate, ResultUpdate, StudentLoginRequest, TeacherAdminLoginRequest
+from schemas import UserCreate, ClassCreate,SubjectCreate,TeacherCreate, StudentCreate, ResultCreate, ResultUpdate, StudentLoginRequest, TeacherAdminLoginRequest, ClassUpdate,Class
 from collections import defaultdict
 
 
@@ -133,10 +133,37 @@ def remove_class(class_id: int, conn: pymssql.Connection = Depends(get_db)):
 
 
 # Update an existing class
-@app.put("/classes/{class_id}")
-def modify_class(class_id: int, new_class: int, conn: pymssql.Connection = Depends(get_db)):
-    return crud.update_class(conn, class_id, new_class)
+#@app.put("/classes/{class_id}")
+#def modify_class(class_id: int, new_class: int, conn: pymssql.Connection = Depends(get_db)):
+ #   return crud.update_class(conn, class_id, new_class)
 
+
+@app.put("/classes/{class_id}")
+async def update_class(class_id: int, class_data: ClassUpdate, conn: pymssql.Connection = Depends(get_db)):
+    #print(f"Received request to update class {class_id} with data: {class_data.dict()}")  # Debugging print
+
+    cursor = conn.cursor()
+
+    # Check if class ID exists
+    cursor.execute("SELECT id FROM classes WHERE id = %s", (class_id,))
+    existing_class = cursor.fetchone()
+    if not existing_class:
+        print(f"Class ID {class_id} not found.")  # Debugging print
+        raise HTTPException(status_code=404, detail="Class not found")
+
+    # Check if the new class_ value already exists
+    cursor.execute("SELECT id FROM classes WHERE class = %s AND id != %s", (class_data.class_, class_id))
+    duplicate_class = cursor.fetchone()
+    if duplicate_class:
+        print(f"Class {class_data.class_} already exists.")  # Debugging print
+        raise HTTPException(status_code=400, detail="Class already exists")
+
+    # Proceed with update
+    cursor.execute("UPDATE classes SET class = %s WHERE id = %s", (class_data.class_, class_id))
+    conn.commit()
+
+    print(f"Class {class_id} updated successfully.")  # Debugging print
+    return {"message": "Class updated successfully"}
 
 
 

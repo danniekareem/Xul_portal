@@ -127,7 +127,7 @@ body {
     margin-top: 10px;
   }
   
-/* Make the entire dashboard cover the full screen */
+/* 🔹 Full-Screen Layout */
 .dashboard-container {
   display: flex;
   height: 100vh;
@@ -136,7 +136,7 @@ body {
   overflow: hidden;
 }
 
-/* Sidebar */
+/* 🔹 Sidebar */
 .sidebar {
   width: 250px;
   background: #007bff;
@@ -147,6 +147,7 @@ body {
   justify-content: space-between;
   height: 100vh;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: width 0.3s ease-in-out;
 }
 
 .sidebar h3 {
@@ -154,6 +155,7 @@ body {
   margin-bottom: 20px;
 }
 
+/* Sidebar Links */
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -177,6 +179,7 @@ body {
   color: white;
 }
 
+/* Logout Button */
 .logout-button {
   background: red;
   color: white;
@@ -187,21 +190,24 @@ body {
   text-align: center;
   font-size: 16px;
   font-weight: bold;
-  margin-bottom: 30px; /* Adds spacing above */
+  margin-bottom: 40px;
   align-self: center;
   width: 100%;
 }
+
 .logout-button:hover {
   background: darkred;
 }
 
-/* Main Content */
+/* 🔹 Main Content */
 .dashboard-main {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100vh;
+  padding: 20px;
+  background: #f4f4f4;
+  overflow-y: auto;
 }
 
 /* Header */
@@ -212,16 +218,17 @@ body {
   text-align: center;
   padding: 15px;
   border-radius: 10px;
-  
+  margin-bottom: 20px;
 }
 
-/* Summary Section */
+/* 🔹 Summary Section */
 .dashboard-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   width: 100%;
-  max-width: 900px;
+  max-width: 1200px;
+  margin-bottom: 20px;
 }
 
 .summary-card {
@@ -232,4 +239,78 @@ body {
   font-size: 18px;
   font-weight: bold;
   text-align: center;
+}
+
+/* 🔹 Responsive Design for Mobile/Tablet */
+@media (max-width: 1024px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  /* Sidebar collapses on smaller screens */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 10px;
+    box-shadow: none;
+  }
+
+  .sidebar ul {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 0;
+    margin: 0;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .sidebar li {
+    padding: 8px 15px;
+    margin: 5px;
+    font-size: 14px;
+  }
+
+  /* Main content adjusts */
+  .dashboard-main {
+    padding: 15px;
+    width: 100%;
+  }
+
+  /* Hide summary section on small screens */
+  .dashboard-summary {
+    display: none; /* Hides the summary on mobile/tablet */
+  }
+
+  .summary-card {
+    font-size: 16px;
+    padding: 15px;
+  }
+
+  /* Adjust logout button position */
+  .logout-button {
+    padding: 10px 20px;
+    margin: 30px auto;
+    width: auto;
+  }
+}
+
+/* 🔹 Small Screen Optimization */
+@media (max-width: 600px) {
+  .sidebar li {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .dashboard-header {
+    font-size: 18px;
+  }
+
+  .summary-card {
+    font-size: 14px;
+    padding: 12px;
+  }
 }
