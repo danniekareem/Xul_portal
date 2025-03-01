@@ -3,7 +3,11 @@ from pymssql import Connection
 from schemas import UserCreate, ClassCreate, SubjectCreate,TeacherCreate,StudentCreate, ResultCreate, ResultUpdate, TeacherAdminLoginRequest
 import bcrypt
 from fastapi import HTTPException
+import logging
 
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 
@@ -533,10 +537,10 @@ def create_result(conn, result):
 
     # 🔹 Insert the result if all checks pass
     query = """
-        INSERT INTO results (studentID, classID, subjectID, teacherID, marks, result_date, record_status)
-        VALUES (%s, %s, %s, %s, %s, %s, 'Active')
+        INSERT INTO results (studentID, classID, subjectID, teacherID, marks, result_date, record_status, UserID)
+        VALUES (%s, %s, %s, %s, %s, %s, 'Active', %s)
     """
-    cursor.execute(query, (result.studentID, result.classID, result.subjectID, result.teacherID, result.marks, result.result_date))
+    cursor.execute(query, (result.studentID, result.classID, result.subjectID, result.teacherID, result.marks, result.result_date, result.UserID))
     
     conn.commit()
     return {"message": "Result added successfully"}
@@ -583,17 +587,34 @@ def get_results(conn):
 
 # Fetch results by studentID (userid)
 def get_results_by_student_id(conn, student_id: str):
+    #logger.info(f"Executing query for student ID: {student_id}")  # ✅ Log before query
+
     query = """
-        SELECT r.subjectID, s.subjectName, r.marks
-        FROM results r
-        JOIN subjects s ON r.subjectID = s.id
-        JOIN students st ON r.userid = st.studentID
-        WHERE r.userid = %s AND r.record_status = 'Active'
+       SELECT r.subjectID, s.subjectName, r.marks,
+       CASE 
+           WHEN r.marks = 50 THEN 'Pass'
+           WHEN r.marks BETWEEN 51 AND 60 THEN 'Good'
+           WHEN r.marks BETWEEN 61 AND 70 THEN 'Very Good'
+           WHEN r.marks BETWEEN 71 AND 100 THEN 'Excellent'
+           ELSE 'Fail'
+            END AS remark,
+            SUM(r.marks) OVER (PARTITION BY r.UserID) AS total_marks
+            FROM results r
+            JOIN subjects s ON r.subjectID = s.id
+            JOIN students st ON r.UserID = st.studentID
+            WHERE r.UserID = %s AND r.record_status = 'Active'
     """
+    
     cursor = conn.cursor(as_dict=True)
     cursor.execute(query, (student_id,))
-    return cursor.fetchall()
+    results = cursor.fetchall()
 
+    if not results:
+        logger.info(f"No results found in DB for student ID: {student_id}")
+        return None  # ✅ Return None instead of calling itself again
+
+    logger.info(f"Query successful. Returning results for student ID: {student_id}")
+    return results  # ✅ Return results instead of calling itself
 
 # Update a result
 def update_result(conn, result_id: int, result: ResultUpdate):

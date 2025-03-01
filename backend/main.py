@@ -5,7 +5,10 @@ from db import get_db
 import crud 
 from schemas import UserCreate, ClassCreate,SubjectCreate,TeacherCreate, StudentCreate, ResultCreate, ResultUpdate, StudentLoginRequest, TeacherAdminLoginRequest, ClassUpdate,Class
 from collections import defaultdict
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Create FastAPI instance
 app = FastAPI()
@@ -232,7 +235,7 @@ def remove_teacher(teacher_id: int, conn: pymssql.Connection = Depends(get_db)):
 
 
 #######################################################
-# teachers ENDPOINTS
+# students ENDPOINTS
 ######################################################
 
 # Create Student
@@ -282,19 +285,18 @@ def get_results(conn=Depends(get_db)):
 
 
 # Get results for a student by studentID (userid)
-@app.get("/results/{student_id}")
+@app.get("/student_results/{student_id}")
 def get_student_results(student_id: str, conn=Depends(get_db)):
-    results = crud.get_results_by_student_id(conn, student_id)
+    #logger.info(f"Fetching results for student ID: {student_id}")  
+
+    results = crud.get_results_by_student_id(conn, student_id)  # ✅ Make sure it's calling the function in `crud.py`
+    
     if not results:
+        logger.info(f"No results found for student ID: {student_id}")
         return {"message": "No results found"}
-    
-    total_marks = sum(result["marks"] for result in results)
-    
-    return {
-        "student_id": student_id,
-        "subjects_with_marks": {result["subjectName"]: result["marks"] for result in results},
-        "total_marks": total_marks
-    }
+
+    logger.info(f"Response: {results}")  
+    return results
 
 # Update a result
 @app.put("/results/{result_id}")
