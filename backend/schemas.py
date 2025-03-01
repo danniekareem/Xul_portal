@@ -64,6 +64,7 @@ class ResultCreate(BaseModel):
     teacherID: int
     marks: float
     result_date: date
+    UserID:str
 
 class ResultUpdate(BaseModel):
     marks: float

@@ -69,63 +69,6 @@ body {
 
 
   
-  /* Login Container */
-  .login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    padding: 20px;
-  }
-  
-  .login-title {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
-  }
-  
-  /* Form Elements */
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    width: 300px;
-  }
-  
-  .input-field {
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-  }
-  
-  .input-field:focus {
-    border-color: #007bff;
-    outline: none;
-  }
-  
-  /* Submit Button */
-  .submit-btn {
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .submit-btn:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Error Message */
-  .error-message {
-    color: red;
-    text-align: center;
-    margin-top: 10px;
-  }
   
 /* 🔹 Full-Screen Layout */
 .dashboard-container {

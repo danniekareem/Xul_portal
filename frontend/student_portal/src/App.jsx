@@ -1,62 +1,17 @@
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import "./Results.css"; // Import the CSS file
+
+//COMPONEST
 import ManageClasses from "./pages/ManageClasses";
+import Login from "./pages/Login";
+import Results from "./pages/Results";
+
+// CSS FILES
+import "./Results.css"; 
+import "./assets/LoginStyle.css"
 
 
 const apiUrl = "http://127.0.0.1:8000"; // FastAPI backend URL
-
-const Login = () => {
-    const navigate = useNavigate();
-    const [studentID, setStudentID] = useState("");
-    const [dob, setDob] = useState("");
-    const [error, setError] = useState("");
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setError("");
-
-        const response = await fetch(`${apiUrl}/student-login/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ studentID, dob })
-        });
-        const data = await response.json();
-
-        if (data.message === "Login successful" && data.student_id) {
-            localStorage.setItem("student_id", data.student_id);
-            localStorage.setItem("student_name", data.student_name);
-            navigate("/results");
-        } else {
-            setError("Invalid credentials");
-        }
-    };
-
-    return (
-        <div className="login-container">
-            <h2 className="login-title">Student Login</h2>
-            <form onSubmit={handleLogin} className="login-form">
-                <input
-                    type="text"
-                    placeholder="Student ID"
-                    value={studentID}
-                    onChange={(e) => setStudentID(e.target.value)}
-                    required
-                    className="input-field"
-                />
-                <input
-                    type="date"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    required
-                    className="input-field"
-                />
-                <button type="submit" className="submit-btn">Login</button>
-            </form>
-            {error && <p className="error-message">{error}</p>}
-        </div>
-    );
-};
 
 
 
@@ -193,10 +148,10 @@ export default function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/login_student" element={<Login />} />
-                
+                <Route path="/login" element={<Login />} />
                 <Route path="/login_teacher_admin" element={<TeacherAdminLogin />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/results" element={<Results />} />
                 {/* Remove separate route for ManageClasses */}
             </Routes>
         </Router>
